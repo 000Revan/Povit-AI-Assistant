@@ -1,0 +1,12 @@
+.env
+.idea/
+backend/.env
+backend/.venv/
+backend/app/data/
+__pycache__/
+**/__pycache__/
+backend/.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+*.pyc
+*.pyc.*

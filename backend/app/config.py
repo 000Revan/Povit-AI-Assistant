@@ -1,0 +1,48 @@
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    dashscope_api_key: str = ""
+    dashscope_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    tavily_api_key: str = ""
+    tavily_base_url: str = "https://api.tavily.com"
+    amap_weather_api_key: str = ""
+    amap_weather_base_url: str = "https://restapi.amap.com/v3/weather/weatherInfo"
+    amap_adcode_path: str = "./app/data/AMap_adcode_citycode.xlsx"
+    qwen_model: str = "qwen-max"
+    embedding_model: str = "text-embedding-v4"
+    database_url: str = "sqlite:///./app/data/pivot_ai.db"
+    upload_dir: str = "./app/data/uploads"
+    chroma_dir: str = "./app/data/chroma"
+    crawler_cache_dir: str = "./app/data/cache"
+    crawler_cache_ttl_seconds: int = 3600
+    frontend_origin: str = "http://localhost:5173"
+    rag_collection_name: str = "pivot_ai_knowledge"
+    chunk_size: int = 600
+    chunk_overlap: int = 80
+    embedding_dimensions: int = 1024
+    retrieval_top_k: int = 5
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    @property
+    def sqlite_path(self) -> Path:
+        if self.database_url.startswith("sqlite:///"):
+            return Path(self.database_url.replace("sqlite:///", "", 1))
+        return Path("./app/data/pivot_ai.db")
+
+
+@lru_cache
+def get_settings() -> Settings:
+    settings = Settings()
+    for raw_path in [
+        settings.sqlite_path.parent,
+        Path(settings.upload_dir),
+        Path(settings.chroma_dir),
+        Path(settings.crawler_cache_dir),
+    ]:
+        raw_path.mkdir(parents=True, exist_ok=True)
+    return settings
