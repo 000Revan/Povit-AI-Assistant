@@ -4,7 +4,15 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.agents.graph import run_agent_graph, run_agent_graph_stream
-from app.db.session_db import add_message, create_session, delete_session, list_messages, list_sessions
+from app.db.session_db import (
+    add_message,
+    create_session,
+    delete_session,
+    get_session,
+    list_messages,
+    list_sessions,
+    update_session_title,
+)
 from app.models.chat import ChatRequest, ChatResponse, SessionCreate
 
 router = APIRouter(tags=["chat"])
@@ -38,6 +46,7 @@ def get_messages(session_id: str) -> list[dict]:
 async def post_chat(payload: ChatRequest) -> ChatResponse:
     if not payload.message.strip():
         raise HTTPException(status_code=400, detail="消息不能为空")
+    _rename_new_session_after_first_question(payload.session_id, payload.message)
     add_message(payload.session_id, "user", payload.message)
     history = list_messages(payload.session_id)
     result = await run_agent_graph(payload.message, history)
@@ -51,6 +60,7 @@ async def post_chat_stream(payload: ChatRequest) -> StreamingResponse:
         raise HTTPException(status_code=400, detail="消息不能为空")
 
     async def stream() -> AsyncIterator[str]:
+        _rename_new_session_after_first_question(payload.session_id, payload.message)
         add_message(payload.session_id, "user", payload.message)
         history = list_messages(payload.session_id)
         answer_parts: list[str] = []
@@ -60,3 +70,21 @@ async def post_chat_stream(payload: ChatRequest) -> StreamingResponse:
         add_message(payload.session_id, "assistant", "".join(answer_parts))
 
     return StreamingResponse(stream(), media_type="text/plain; charset=utf-8")
+
+
+def _rename_new_session_after_first_question(session_id: str, message: str) -> None:
+    session = get_session(session_id)
+    if not session or session["title"] != "新建会话":
+        return
+    has_user_message = any(item["role"] == "user" for item in list_messages(session_id))
+    if has_user_message:
+        return
+    update_session_title(session_id, _summarize_title(message))
+
+
+def _summarize_title(message: str) -> str:
+    title = message.strip().replace("\n", " ")
+    for token in ["请问", "请帮我", "帮我", "一下", "吗", "？", "?", "。", "，", ","]:
+        title = title.replace(token, "")
+    title = " ".join(title.split())
+    return title[:14] or "新建会话"

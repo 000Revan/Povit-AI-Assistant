@@ -123,6 +123,7 @@ const handleSend = async () => {
     ElMessage.error(error?.message || '消息发送失败')
   } finally {
     sending.value = false
+    await loadSessions()
   }
 }
 

@@ -52,6 +52,17 @@ def list_sessions() -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def get_session(session_id: str) -> dict | None:
+    with _connect() as conn:
+        row = conn.execute("SELECT * FROM sessions WHERE id = ?", (session_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def update_session_title(session_id: str, title: str) -> None:
+    with _connect() as conn:
+        conn.execute("UPDATE sessions SET title = ? WHERE id = ?", (title, session_id))
+
+
 def delete_session(session_id: str) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
@@ -78,4 +89,3 @@ def list_messages(session_id: str) -> list[dict]:
             (session_id,),
         ).fetchall()
     return [dict(row) for row in rows]
-
