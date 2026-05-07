@@ -69,7 +69,7 @@ def save_csv_cache(cache_key: str, rows: list[dict[str, Any]], fieldnames: list[
 
 
 def purge_expired_cache() -> dict[str, Any]:
-    cache_dir = Path(get_settings().crawler_cache_dir)
+    cache_dir = get_settings().resolved_crawler_cache_dir
     deleted: list[str] = []
     for meta_path in cache_dir.glob("*.meta.json"):
         metadata = _read_metadata(meta_path)
@@ -89,7 +89,7 @@ def purge_expired_cache() -> dict[str, Any]:
 
 
 def _cache_paths(cache_key: str) -> dict[str, Path]:
-    cache_dir = Path(get_settings().crawler_cache_dir)
+    cache_dir = get_settings().resolved_crawler_cache_dir
     return {
         "csv_path": cache_dir / f"{cache_key}.csv",
         "meta_path": cache_dir / f"{cache_key}.meta.json",

@@ -40,7 +40,7 @@ def get_weather(message: str | None = None) -> dict[str, Any]:
     if not settings.amap_weather_api_key:
         return _error_result(message, "未配置 AMAP_WEATHER_API_KEY，无法查询高德天气。")
 
-    city, location_result, city_error = _resolve_weather_city(message or "", settings.amap_adcode_path)
+    city, location_result, city_error = _resolve_weather_city(message or "", str(settings.resolved_amap_adcode_path))
     if city_error:
         return _error_result(message, city_error, location=location_result)
 

@@ -6,7 +6,7 @@ from app.rag.embeddings import embed_query, embed_texts
 
 
 def _store_path() -> Path:
-    path = Path(get_settings().chroma_dir) / "fallback_vectors.json"
+    path = get_settings().resolved_chroma_dir / "fallback_vectors.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -127,7 +127,7 @@ def _collection():
     import chromadb
 
     settings = get_settings()
-    client = chromadb.PersistentClient(path=settings.chroma_dir)
+    client = chromadb.PersistentClient(path=str(settings.resolved_chroma_dir))
     return client.get_or_create_collection(name=settings.rag_collection_name)
 
 

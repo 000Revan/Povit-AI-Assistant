@@ -3,6 +3,8 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
 
 class Settings(BaseSettings):
     dashscope_api_key: str = ""
@@ -33,8 +35,31 @@ class Settings(BaseSettings):
     @property
     def sqlite_path(self) -> Path:
         if self.database_url.startswith("sqlite:///"):
-            return Path(self.database_url.replace("sqlite:///", "", 1))
-        return Path("./app/data/pivot_ai.db")
+            return resolve_backend_path(self.database_url.replace("sqlite:///", "", 1))
+        return resolve_backend_path("./app/data/pivot_ai.db")
+
+    @property
+    def resolved_upload_dir(self) -> Path:
+        return resolve_backend_path(self.upload_dir)
+
+    @property
+    def resolved_chroma_dir(self) -> Path:
+        return resolve_backend_path(self.chroma_dir)
+
+    @property
+    def resolved_crawler_cache_dir(self) -> Path:
+        return resolve_backend_path(self.crawler_cache_dir)
+
+    @property
+    def resolved_amap_adcode_path(self) -> Path:
+        return resolve_backend_path(self.amap_adcode_path)
+
+
+def resolve_backend_path(path: str | Path) -> Path:
+    raw_path = Path(path)
+    if raw_path.is_absolute():
+        return raw_path
+    return BACKEND_ROOT / raw_path
 
 
 @lru_cache
@@ -42,9 +67,9 @@ def get_settings() -> Settings:
     settings = Settings()
     for raw_path in [
         settings.sqlite_path.parent,
-        Path(settings.upload_dir),
-        Path(settings.chroma_dir),
-        Path(settings.crawler_cache_dir),
+        settings.resolved_upload_dir,
+        settings.resolved_chroma_dir,
+        settings.resolved_crawler_cache_dir,
     ]:
         raw_path.mkdir(parents=True, exist_ok=True)
     return settings

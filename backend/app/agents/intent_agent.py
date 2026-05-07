@@ -1,10 +1,23 @@
 def parse_intent(message: str) -> str:
+    normalized = message.strip()
     task_keywords = [
+        "agent",
+        "Agent",
+        "LangGraph",
+        "langgraph",
         "rag",
         "RAG",
         "知识库",
         "向量",
         "流程",
+        "图",
+        "节点",
+        "路由",
+        "工具调用",
+        "实现",
+        "优化",
+        "代码",
+        "接口",
         "上传",
         "文档",
         "资料",
@@ -17,7 +30,14 @@ def parse_intent(message: str) -> str:
         "新闻",
         "天气",
         "时间",
+        "几点",
+        "日期",
+        "今天",
+        "现在",
         "地点",
+        "位置",
+        "地址",
+        "定位",
         "B站",
         "b站",
         "哔哩哔哩",
@@ -32,4 +52,4 @@ def parse_intent(message: str) -> str:
         "分析",
         "总结",
     ]
-    return "task" if any(keyword in message for keyword in task_keywords) else "chitchat"
+    return "task" if any(keyword in normalized for keyword in task_keywords) else "chitchat"

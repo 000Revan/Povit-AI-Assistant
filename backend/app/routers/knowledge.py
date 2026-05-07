@@ -1,4 +1,3 @@
-from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -31,7 +30,7 @@ async def upload(file: UploadFile = File(...)) -> dict:
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    target = Path(get_settings().upload_dir) / f"{uuid4()}_{file.filename}"
+    target = get_settings().resolved_upload_dir / f"{uuid4()}_{file.filename}"
     content = await file.read()
     target.write_bytes(content)
     text = extract_text(target)

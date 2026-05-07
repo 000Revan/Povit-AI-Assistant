@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone as fixed_timezone
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -11,7 +11,9 @@ def get_current_time(timezone: str | None = None) -> dict[str, Any]:
     try:
         tz = ZoneInfo(timezone_name)
     except ZoneInfoNotFoundError:
-        return _error_result(timezone_name, f"无法识别时区：{timezone_name}")
+        if timezone_name not in {DEFAULT_TIMEZONE, "UTC+8", "GMT+8"}:
+            return _error_result(timezone_name, f"无法识别时区：{timezone_name}")
+        tz = fixed_timezone(timedelta(hours=8), DEFAULT_TIMEZONE)
 
     now = datetime.now(tz)
     data = {
