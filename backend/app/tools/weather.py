@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from openpyxl import load_workbook
 
 from app.config import get_settings
+from app.tools.location_tool import get_location
 
 WEATHER_FIELD_NAMES = {
     "province": "省份",
@@ -40,13 +40,9 @@ def get_weather(message: str | None = None) -> dict[str, Any]:
     if not settings.amap_weather_api_key:
         return _error_result(message, "未配置 AMAP_WEATHER_API_KEY，无法查询高德天气。")
 
-    try:
-        city = _match_city(message or "", settings.amap_adcode_path)
-    except Exception as exc:
-        return _error_result(message, f"读取城市编码表失败：{exc}")
-
-    if not city:
-        return _error_result(message, "未能从用户输入中识别城市或地区名称。")
+    city, location_result, city_error = _resolve_weather_city(message or "", settings.amap_adcode_path)
+    if city_error:
+        return _error_result(message, city_error, location=location_result)
 
     extensions = _resolve_extensions(message or "")
     params = {
@@ -73,6 +69,7 @@ def get_weather(message: str | None = None) -> dict[str, Any]:
         "city": city["name"],
         "extensions": extensions,
         "data": rows,
+        "location": location_result.get("data") if location_result else None,
         "formatted": formatted,
     }
 
@@ -135,6 +132,7 @@ def _error_result(
     error: str,
     city: dict[str, str] | None = None,
     extensions: str | None = None,
+    location: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "tool": "weather",
@@ -143,9 +141,41 @@ def _error_result(
         "city": city.get("name") if city else None,
         "extensions": extensions,
         "data": [],
+        "location": location.get("data") if location else None,
         "formatted": f"高德天气工具：{error}",
         "error": error,
     }
+
+
+def _resolve_weather_city(
+    message: str,
+    adcode_path: str,
+) -> tuple[dict[str, str] | None, dict[str, Any] | None, str | None]:
+    city_error = ""
+    try:
+        city = _match_city(message, adcode_path)
+    except Exception as exc:
+        city = None
+        city_error = f"读取城市编码表失败：{exc}"
+
+    if city:
+        return city, None, None
+
+    location_result = get_location()
+    if not location_result.get("implemented"):
+        error = location_result.get("error") or "定位工具未能获取当前位置。"
+        prefix = f"{city_error}，且" if city_error else "未能从用户输入中识别城市或地区名称，且"
+        return None, location_result, f"{prefix}{error}"
+
+    location_data = location_result.get("data") or {}
+    adcode = str(location_data.get("区域编码") or "").strip()
+    city_name = str(location_data.get("城市") or location_data.get("省份") or "").strip()
+    if not adcode:
+        return None, location_result, "定位工具未返回城市区域编码，无法查询天气。"
+    if not city_name:
+        city_name = adcode
+
+    return {"name": city_name, "adcode": adcode}, location_result, None
 
 
 def _match_city(message: str, adcode_path: str) -> dict[str, str] | None:
@@ -179,6 +209,8 @@ def _adcode_specificity(adcode: str) -> int:
 
 @lru_cache(maxsize=4)
 def _load_adcodes(adcode_path: str) -> tuple[dict[str, str], ...]:
+    from openpyxl import load_workbook
+
     path = Path(adcode_path)
     if not path.exists():
         raise FileNotFoundError(f"城市编码表不存在：{path}")

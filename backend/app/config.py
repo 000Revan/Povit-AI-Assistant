@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     tavily_base_url: str = "https://api.tavily.com"
     amap_weather_api_key: str = ""
     amap_weather_base_url: str = "https://restapi.amap.com/v3/weather/weatherInfo"
+    amap_ip_api_key: str = ""
+    amap_ip_base_url: str = "https://restapi.amap.com/v3/ip"
     amap_adcode_path: str = "./app/data/AMap_adcode_citycode.xlsx"
     qwen_model: str = "qwen-max"
     embedding_model: str = "text-embedding-v4"

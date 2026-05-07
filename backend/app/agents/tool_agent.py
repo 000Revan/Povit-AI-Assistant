@@ -11,7 +11,7 @@ def run_tools(message: str) -> list[dict]:
         results.append(get_current_time())
     if "天气" in message:
         results.append(get_weather(message))
-    if "地点" in message or "位置" in message:
+    if "地点" in message or "位置" in message or "地址" in message or "定位" in message:
         results.append(get_location())
     if _should_fetch_bilibili_popular(message):
         results.append(get_bilibili_popular_videos(limit=20))
