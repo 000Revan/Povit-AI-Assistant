@@ -1,8 +1,8 @@
 <template>
   <section class="panel session-panel">
     <div class="panel-title">
-      <span><i></i>会话</span>
-      <el-button circle type="primary" :icon="Plus" @click="$emit('create')" />
+      <span><i class="title-dot"></i>会话</span>
+      <el-button class="create-session-button" circle type="primary" :icon="Plus" @click="$emit('create')" />
     </div>
     <div class="session-list">
       <button
@@ -32,4 +32,3 @@ defineEmits(['create', 'select', 'remove'])
 
 const formatTime = (value) => (value ? value.slice(11, 16) : '')
 </script>
-

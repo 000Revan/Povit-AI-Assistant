@@ -225,7 +225,7 @@ h1 {
   color: #30334a;
 }
 
-.panel-title i {
+.panel-title .title-dot {
   display: inline-block;
   width: 8px;
   height: 8px;
@@ -233,6 +233,33 @@ h1 {
   border-radius: 999px;
   background: linear-gradient(135deg, #54cae0, #8667ef);
   box-shadow: 0 0 18px rgba(132, 124, 255, 0.58);
+}
+
+.create-session-button.el-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  color: #fff;
+  background: linear-gradient(135deg, #5dcdeb, #6f8cff);
+  box-shadow: 0 10px 24px rgba(78, 139, 220, 0.28);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.create-session-button.el-button:hover,
+.create-session-button.el-button:focus {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.96);
+  background: linear-gradient(135deg, #54c7e5, #7a78ff);
+  box-shadow: 0 14px 30px rgba(78, 139, 220, 0.34);
+  filter: saturate(1.06);
+  transform: translateY(-1px);
+}
+
+.create-session-button .el-icon {
+  font-size: 18px;
 }
 
 .session-list {
@@ -361,6 +388,23 @@ h1 {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   background: rgba(245, 249, 255, 0.94);
+}
+
+.bubble.thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #596174;
+  font-weight: 700;
+}
+
+.thinking-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(116, 126, 220, 0.18);
+  border-top-color: #6f8cff;
+  border-radius: 999px;
+  animation: spin 0.82s linear infinite;
 }
 
 .message-row.user .bubble {
@@ -646,6 +690,12 @@ h1 {
 @keyframes drift {
   50% {
     transform: translate3d(24px, 16px, 0) scale(1.06);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

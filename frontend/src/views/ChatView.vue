@@ -107,7 +107,7 @@ const handleSend = async () => {
 
   draft.value = ''
   messages.value.push({ localId: makeLocalId(), role: 'user', content: text })
-  messages.value.push({ localId: makeLocalId(), role: 'assistant', content: '' })
+  messages.value.push({ localId: makeLocalId(), role: 'assistant', content: '助手思考中', thinking: true })
   const assistantIndex = messages.value.length - 1
   sending.value = true
   await scrollToBottom()
@@ -115,9 +115,17 @@ const handleSend = async () => {
   try {
     await streamMessage(activeSessionId.value, text, async (chunk) => {
       if (!chunk) return
+      if (messages.value[assistantIndex].thinking) {
+        messages.value[assistantIndex].thinking = false
+        messages.value[assistantIndex].content = ''
+      }
       messages.value[assistantIndex].content += chunk
       await scrollToBottom()
     })
+    if (messages.value[assistantIndex]?.thinking) {
+      messages.value[assistantIndex].thinking = false
+      messages.value[assistantIndex].content = '暂时没有收到有效回复，请稍后再试。'
+    }
   } catch (error) {
     messages.value.splice(assistantIndex, 1)
     ElMessage.error(error?.message || '消息发送失败')
