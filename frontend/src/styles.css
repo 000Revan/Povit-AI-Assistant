@@ -358,6 +358,8 @@ h1 {
   border-radius: 18px;
   color: #172033;
   line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background: rgba(245, 249, 255, 0.94);
 }
 

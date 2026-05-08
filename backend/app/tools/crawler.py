@@ -237,18 +237,18 @@ def _success_result(rows: list[dict[str, Any]], csv_path: str, metadata: dict[st
 
 
 def _format_bilibili_rows(rows: list[dict[str, Any]], csv_path: str, metadata: dict[str, Any], cache_hit: bool) -> str:
-    source = "缓存命中" if cache_hit else "重新爬取"
-    lines = [
-        f"B站综合热门视频（{source}）：",
-        f"CSV: {csv_path}",
-        f"生成时间: {metadata.get('generated_at', '')}",
-        f"有效期至: {metadata.get('expires_at', '')}",
-        "Top 20:",
-    ]
-    for row in rows[:20]:
+    lines = ["给你整理了 10 个 B站热门视频："]
+    for row in rows[:10]:
         lines.append(
-            f"{row.get('排名')}. {row.get('标题')} | UP: {row.get('UP主名称')} | "
-            f"播放: {row.get('播放量')} | 点赞: {row.get('点赞数')} | {row.get('视频链接')}"
+            "\n".join(
+                [
+                    "",
+                    f"{row.get('排名')}. {row.get('标题')}",
+                    f"UP主：{row.get('UP主名称')}",
+                    f"热度：播放 {row.get('播放量')} / 点赞 {row.get('点赞数')}",
+                    f"观看：{row.get('视频链接')}",
+                ]
+            )
         )
     return "\n".join(lines)
 
@@ -268,17 +268,17 @@ def _netease_success_result(rows: list[dict[str, Any]], csv_path: str, metadata:
 
 
 def _format_netease_rows(rows: list[dict[str, Any]], csv_path: str, metadata: dict[str, Any], cache_hit: bool) -> str:
-    source = "缓存命中" if cache_hit else "重新爬取"
-    lines = [
-        f"网易云音乐飙升榜 Top 100（{source}）：",
-        f"CSV: {csv_path}",
-        f"生成时间: {metadata.get('generated_at', '')}",
-        f"有效期至: {metadata.get('expires_at', '')}",
-        "前十首:",
-    ]
+    lines = ["给你整理了网易云音乐飙升榜前 10 首："]
     for row in rows[:10]:
         lines.append(
-            f"{row.get('排名')}. {row.get('歌名')} | 歌手: {row.get('歌手')} | "
-            f"专辑: {row.get('专辑')} | 时长: {row.get('时长')} | {row.get('歌曲链接')}"
+            "\n".join(
+                [
+                    "",
+                    f"{row.get('排名')}. {row.get('歌名')}",
+                    f"歌手：{row.get('歌手')}",
+                    f"专辑：{row.get('专辑')} / 时长：{row.get('时长')}",
+                    f"试听：{row.get('歌曲链接')}",
+                ]
+            )
         )
     return "\n".join(lines)
